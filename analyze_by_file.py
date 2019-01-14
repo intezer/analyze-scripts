@@ -1,7 +1,8 @@
+import pprint
 import sys
 import time
+
 import requests
-import pprint
 
 base_url = 'https://analyze.intezer.com/api/v2-0'
 api_key = 'YOUR API KEY'
