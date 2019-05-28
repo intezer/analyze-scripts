@@ -1,4 +1,4 @@
-# Intezer Analyze SDK
+# Intezer Analyze Scripts
 Basic scripts of Intezer Analyze API 2.0
 
 Currently the following scripts are available:
