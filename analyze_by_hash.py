@@ -4,8 +4,6 @@ import time
 
 import requests
 
-# Note: Analyze by hash is not available for community accounts
-
 base_url = 'https://analyze.intezer.com/api/v2-0'
 api_key = 'YOUR API KEY'
 
