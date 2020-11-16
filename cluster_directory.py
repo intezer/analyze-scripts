@@ -49,7 +49,8 @@ def analyze_directory(dir_path, session):
 
 def send_to_related_samples(analysis_id, session):
     response = session.post(BASE_URL + '/analyses/{}/sub-analyses/root/get-account-related-samples'.format(analysis_id))
-    assert response.status_code == 201
+    if response.status_code != 201
+        print("Get related sampled for analysis ID: {0} failed with status code {1}".format(analysis_id, response.status_code))
     result_url = response.json()['result_url']
     return result_url
 
@@ -98,7 +99,6 @@ def draw_graph(previous_samples, results, session):
 
 def main(dir_path):
     session = get_session()
-    analyze_directory(dir_path, session)
     results = analyze_directory(dir_path, session)
     previous_samples = get_related_samples(results, session)
     draw_graph(previous_samples, results, session)
