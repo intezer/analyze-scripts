@@ -57,6 +57,7 @@ def analyze_directory(dir_path, session):
 
 
 def send_to_related_samples(analysis_id, session):
+    result_url = ''
     response = session.post(BASE_URL + '/analyses/{}/sub-analyses/root/get-account-related-samples'.format(analysis_id))
     if response.status_code != 201:
         print("Get related sampled for analysis ID: {0} failed with status code {1}".format(analysis_id, response.status_code))
