@@ -23,10 +23,10 @@ def send_to_analysis(file_path, session):
     with open(file_path, 'rb') as file_to_upload:
         files = {'file': (os.path.basename(file_path), file_to_upload)}
         response = session.post(BASE_URL + '/analyze', files=files)
-        if response.status_code == 201:
+        if response.status_code == 201 or response.status_code == 200:
             result_url = response.json()['result_url']
         else:
-            print("Analyzing of file named {0} failed with code: {1} message: {2} ".format(file_path,
+            print('Analyzing of file named {0} failed with code: {1} message: {2} '.format(file_path,
                                                                                            response.status_code,
                                                                                            response.text))
         return result_url
@@ -39,7 +39,7 @@ def analyze_directory(dir_path, session):
         file_path = os.path.join(dir_path, path)
         if os.path.isfile(file_path):
             result_url = send_to_analysis(file_path, session)
-            if result_url != '':
+            if result_url:
                 result_urls.append((result_url, os.path.basename(path)))
 
     while result_urls:
@@ -60,7 +60,7 @@ def send_to_related_samples(analysis_id, session):
     result_url = ''
     response = session.post(BASE_URL + '/analyses/{}/sub-analyses/root/get-account-related-samples'.format(analysis_id))
     if response.status_code != 201:
-        print("Get related sampled for analysis ID: {0} failed with status code {1}".format(analysis_id, response.status_code))
+        print('Get related sampled for analysis ID: {0} failed with status code {1}'.format(analysis_id, response.status_code))
     else:
         result_url = response.json()['result_url']
     return result_url
@@ -71,7 +71,7 @@ def get_related_samples(results, session):
     previous_samples = {}
     for sha256, analysis_id, file_name in results:
         result_url = send_to_related_samples(analysis_id, session)
-        if result_url != '':
+        if result_url:
             result_urls.append((sha256, result_url))
 
     while result_urls:
@@ -101,8 +101,8 @@ def draw_graph(previous_samples, results, session):
             if analysis['analysis']['sha256'] in previous_samples:
                 g.add_edge(sha256, analysis['analysis']['sha256'], gene_count=analysis['reused_genes']['gene_count'])
 
-    gexf.write_gexf(g, "output.gexf")
-    print(f'graph was saved')
+    gexf.write_gexf(g, 'output.gexf')
+    print('graph was saved')
 
 
 def main(dir_path):
