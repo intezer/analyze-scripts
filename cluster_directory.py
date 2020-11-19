@@ -1,7 +1,6 @@
 import os
 import sys
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import requests
 import networkx.readwrite.gexf as gexf
@@ -102,7 +101,7 @@ def draw_graph(previous_samples, results, session):
                 g.add_edge(sha256, analysis['analysis']['sha256'], gene_count=analysis['reused_genes']['gene_count'])
 
     gexf.write_gexf(g, 'output.gexf')
-    print('graph was saved')
+    print('graph was saved as output.gexf')
 
 
 def main(dir_path):
