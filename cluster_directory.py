@@ -1,9 +1,9 @@
 import os
 import sys
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import requests
+import networkx.readwrite.gexf as gexf
 
 BASE_URL = 'https://analyze.intezer.com/api/v2-0'
 API_KEY = 'YOUR API KEY'
@@ -18,11 +18,16 @@ def get_session():
 
 
 def send_to_analysis(file_path, session):
+    result_url = ''
     with open(file_path, 'rb') as file_to_upload:
         files = {'file': (os.path.basename(file_path), file_to_upload)}
         response = session.post(BASE_URL + '/analyze', files=files)
-        assert response.status_code == 201
-        result_url = response.json()['result_url']
+        if response.status_code == 201 or response.status_code == 200:
+            result_url = response.json()['result_url']
+        else:
+            print('Analyzing of file named {0} failed with code: {1} message: {2} '.format(file_path,
+                                                                                           response.status_code,
+                                                                                           response.text))
         return result_url
 
 
@@ -32,7 +37,9 @@ def analyze_directory(dir_path, session):
     for path in os.listdir(dir_path):
         file_path = os.path.join(dir_path, path)
         if os.path.isfile(file_path):
-            result_urls.append((send_to_analysis(file_path, session), os.path.basename(path)))
+            result_url = send_to_analysis(file_path, session)
+            if result_url:
+                result_urls.append((result_url, os.path.basename(path)))
 
     while result_urls:
         result_url, file_name = result_urls.pop()
@@ -42,15 +49,19 @@ def analyze_directory(dir_path, session):
             result_urls.append((result_url, file_name))
         else:
             report = response.json()['result']
-            results.append((report['sha256'], report['analysis_id'], file_name))
+            if report['verdict'] != 'not_supported':
+                results.append((report['sha256'], report['analysis_id'], file_name))
 
     return results
 
 
 def send_to_related_samples(analysis_id, session):
+    result_url = ''
     response = session.post(BASE_URL + '/analyses/{}/sub-analyses/root/get-account-related-samples'.format(analysis_id))
-    assert response.status_code == 201
-    result_url = response.json()['result_url']
+    if response.status_code != 201:
+        print('Get related sampled for analysis ID: {0} failed with status code {1}'.format(analysis_id, response.status_code))
+    else:
+        result_url = response.json()['result_url']
     return result_url
 
 
@@ -58,7 +69,9 @@ def get_related_samples(results, session):
     result_urls = []
     previous_samples = {}
     for sha256, analysis_id, file_name in results:
-        result_urls.append((sha256, send_to_related_samples(analysis_id, session)))
+        result_url = send_to_related_samples(analysis_id, session)
+        if result_url:
+            result_urls.append((sha256, result_url))
 
     while result_urls:
         sha256, result_url = result_urls.pop()
@@ -87,18 +100,12 @@ def draw_graph(previous_samples, results, session):
             if analysis['analysis']['sha256'] in previous_samples:
                 g.add_edge(sha256, analysis['analysis']['sha256'], gene_count=analysis['reused_genes']['gene_count'])
 
-    pos = nx.spring_layout(g)
-    edge_labels = dict([((u, v,), g.get_edge_data(u, v)['gene_count']) for u, v in g.edges])
-    nx.draw_networkx_nodes(g, pos)
-    nx.draw_networkx_labels(g, pos, labels, font_size=8)
-    nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
-    nx.draw(g, pos, node_size=1500)
-    plt.show()
+    gexf.write_gexf(g, 'output.gexf')
+    print('graph was saved as output.gexf')
 
 
 def main(dir_path):
     session = get_session()
-    analyze_directory(dir_path, session)
     results = analyze_directory(dir_path, session)
     previous_samples = get_related_samples(results, session)
     draw_graph(previous_samples, results, session)
