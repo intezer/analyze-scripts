@@ -85,15 +85,9 @@ def get_related_samples(results, session):
     return previous_samples
 
 
-def draw_graph(previous_samples, results, session):
+def draw_graph(previous_samples):
     g = nx.Graph()
     g.add_nodes_from(previous_samples)
-    labels = {}
-    for sha256, analysis_id, file_name in results:
-        response = session.get(BASE_URL + '/analyses/{}/sub-analyses/root/code-reuse'.format(analysis_id))
-        response.raise_for_status()
-        gene_count = response.json()['gene_count']
-        labels[sha256] = '{} ({})'.format(file_name, gene_count)
 
     for sha256, (related_samples) in previous_samples.items():
         for analysis in related_samples:
@@ -108,7 +102,7 @@ def main(dir_path):
     session = get_session()
     results = analyze_directory(dir_path, session)
     previous_samples = get_related_samples(results, session)
-    draw_graph(previous_samples, results, session)
+    draw_graph(previous_samples)
 
 
 if __name__ == '__main__':
