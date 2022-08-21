@@ -17,6 +17,7 @@ def generate_report(
         template_text: str,
         logo_base64: str,
         save_html_to_file: bool = False):
+        
     # Basic info
     analysis_result = analysis.result()
     root_analysis: SubAnalysis = analysis.get_root_analysis()
@@ -78,12 +79,12 @@ def generate_report(
     report_template_data = {
         'now': time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.gmtime()),
         'analyze_base_url': 'https://analyze.intezer.com',
-        'logo_base64': logo_base64
+        'logo_base64': logo_base64,
+        'indicators_text': ', '.join(ind.get('name') for ind in root_analysis.metadata.get('indicators', []))
     }
+
     report_template_data.update(analysis_result)
     report_template_data.update(root_analysis.metadata)
-    report_template_data['indicators_text'] = ', '.join(
-        indicator.get('name') for indicator in root_analysis.metadata.get('indicators', []))
     report_template_data.update(family_info)
     report_template_data['sub_analyses'] = sub_analysis_by_source
     report_template_data['ttps'] = ttps
