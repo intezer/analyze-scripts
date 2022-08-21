@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {% if family_name %}
+    <title>{{verdict.replace('_', ' ').capitalize()}}, {{family_name}}, {{sha256}}</title>
+    {% else %}
+    <title>{{verdict.replace('_', ' ').capitalize()}}, {{sha256}}</title>
+    {% endif %}
+</head>
+
+<body>
+<style>{{css_input}}</style>
+
+<article>
+    <img class="logo" src="data:image/png;base64, {{ logo_base64 }}">
+    <h1>Intezer File Scan Report</h1>
+
+    {% if family_name %}
+    <h2>{{verdict.replace('_', ' ').capitalize()}}, {{family_name}}, {{sha256}}</h2>
+    {% else %}
+    <h2>{{verdict.replace('_', ' ').capitalize()}}, {{sha256}}</h2>
+    {% endif %}
+
+    <h2>Analysis Summary</h2>
+    <table>
+        <tbody>
+        <tr>
+            <td class="field-name">Analysis URL</td>
+            <td><a href="{{analysis_url}}">{{analysis_url}}</a></td>
+        </tr>
+        <!--        <tr>-->
+        <!--            <td class="field-name">Filename</td>-->
+        <!--            <td>?</td>-->
+        <!--        </tr>-->
+        <tr>
+            <td class="field-name">SHA256</td>
+            <td>{{sha256}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">MD5</td>
+            <td>{{md5}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">SHA1</td>
+            <td>{{sha1}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">Verdict</td>
+            <td>{{verdict.replace('_', ' ').capitalize()}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">Sub verdict</td>
+            <td>{{sub_verdict.replace('_', ' ').capitalize()}}</td>
+        </tr>
+        {% if family_id and verdict in ['malicious', 'suspicious'] %}
+        <tr>
+            <td class="field-name">Family</td>
+            <td><a href="{{analyze_base_url}}/families/{{family_id}}">{{family_name}}</a></td>
+        </tr>
+        <tr>
+            <td class="field-name">Threat description</td>
+            <td>{{description or 'N/A'}}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td class="field-name">Family</td>
+            <td>{{family_name or 'N/A'}}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="field-name">File type</td>
+            <td>{{file_type.upper()}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">Indicators</td>
+            <td>{{indicators_text or 'N/A'}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">Analyzed at</td>
+            <td>{{analysis_time}}</td>
+        </tr>
+        <tr>
+            <td class="field-name">Report generated at</td>
+            <td>{{now}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Genetic Analysis</h2>
+    <h3>Genetic Summary</h3>
+    <h4>Original file</h4>
+    <table>
+        <thead>
+        <tr>
+            <th>SHA256</th>
+            <th>Verdict</th>
+            <th>Family</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="{{analysis_url}}">{{sha256}}</a></td>
+            <td>{{verdict.replace('_', ' ').capitalize()}}</td>
+            <td>{{family_name or 'N/A'}}</td>
+        </tr>
+        </tbody>
+    </table>
+    {% if 'memory' in sub_analyses and sub_analyses['memory'] %}
+    <h4>Memory modules</h4>
+    <table>
+        <thead>
+        <tr>
+            <th>SHA256</th>
+            <th>Module path</th>
+            <th class="small-cell">PID</th>
+            <th class="small-cell">PPID</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sub_analysis in sub_analyses['memory'] %}
+        <tr>
+            <td><a href="{{analysis_url}}/sub/{{sub_analysis.analysis_id}}">{{sub_analysis.sha256}}</a></td>
+            <td>{{sub_analysis.path}}</td>
+            <td class="small-cell">{{sub_analysis.process_id}}</td>
+            <td class="small-cell">{{sub_analysis.parent_process_id}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if sub_analyses.get('file_system') %}
+    <h4>Dropped files</h4>
+    <table>
+        <thead>
+        <tr>
+            <th>SHA256</th>
+            <th>Path</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sub_analysis in sub_analyses['file_system'] %}
+        <tr>
+            <td><a href="{{analysis_url}}/sub/{{sub_analysis.analysis_id}}">{{sub_analysis.sha256}}</a></td>
+            <td>{{sub_analysis.path}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if sub_analyses.get('static_extraction') %}
+    <h4>Static extraction</h4>
+    <table>
+        <thead>
+        <tr>
+            <th>SHA256</th>
+            <th>Path</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sub_analysis in sub_analyses['static_extraction'] %}
+        <tr>
+            <td><a href="{{analysis_url}}/sub/{{sub_analysis.analysis_id}}">{{sub_analysis.sha256}}</a></td>
+            <td>{{sub_analysis.path}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if ttps %}
+    <h2>TTPs</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>MITRE ATT&CK</th>
+            <th>Technique</th>
+            <th class="small-cell">Severity</th>
+            <th class="long-cell">Details</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ttp in ttps %}
+        <tr>
+            <td>{{ttp.mitre}}</td>
+            <td>{{ttp.technique}}</td>
+            <td class="small-cell">{{ttp.severity}}</td>
+            <td class="long-cell">{{ttp.details}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if verdict not in ['trusted', 'no_threats'] and (network_iocs or file_iocs) %}
+    <h2>IOCs</h2>
+
+    {% if network_iocs %}
+    <h3>Network IOCs</h3>
+    <table>
+        <thead>
+        <tr>
+            <th class="small-cell">Type</th>
+            <th>IOC</th>
+            <th>Source type</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ioc in network_iocs %}
+        <tr>
+            <td class="small-cell">{{ioc.type}}</td>
+            <td>{{ioc.ioc.replace('http', 'hxxp')}}</td>
+            <td>{{', '.join(ioc.source)}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if file_iocs %}
+    <h3>File IOCs</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>SHA256</th>
+            <th>Path</th>
+            <th>Type</th>
+            <th>Classification</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ioc in file_iocs %}
+        <tr>
+            <td>{{ioc.sha256}}</td>
+            <td>{{ioc.path}}</td>
+            <td>{{ioc.type.replace('_', ' ').capitalize()}}</td>
+            <td>{{ioc.verdict.replace('_', ' ').capitalize()}} {% if ioc.family %}, {{ioc.family}}{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% endif %}
+</article>
+</body>
+</html>
