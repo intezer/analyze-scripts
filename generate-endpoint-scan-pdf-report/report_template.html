@@ -5,7 +5,8 @@
 </head>
 
 <body>
-<style>{{css_input}}</style>
+<style>{{css_input|safe}}</style>
+
 <article>
     <img class="logo" src="data:image/png;base64, {{ logo_base64 }}">
     <h1>Intezer Endpoint Scan Report</h1>
@@ -82,7 +83,7 @@
             <th>Family</th>
             {% endif %}
             <th>Path</th>
-            <th>Proccess name</th>
+            <th>Process name</th>
             <th>Command line</th>
         </tr>
         </thead>
