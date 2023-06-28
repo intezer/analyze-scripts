@@ -10,12 +10,12 @@
 <article>
     <img class="logo" src="data:image/png;base64, {{ logo_base64 }}">
     <h1>Intezer Endpoint Scan Report</h1>
-    {% if ep_analysis_metadata.verdict == 'malicious' and ep_analysis_metadata.families %}
-    <h2>{{ep_analysis_metadata.computer_name}} | Infected | {{ep_analysis_metadata.families}}</h2>
-    {% elif ep_analysis_metadata.verdict == 'malicious' %}
-    <h2>{{ep_analysis_metadata.computer_name}} | Infected</h2>
+    {% if endpoint_analysis_metadata.verdict == 'malicious' and endpoint_analysis_metadata.families %}
+    <h2>{{endpoint_analysis_metadata.computer_name}} | Infected | {{endpoint_analysis_metadata.families}}</h2>
+    {% elif endpoint_analysis_metadata.verdict == 'malicious' %}
+    <h2>{{endpoint_analysis_metadata.computer_name}} | Infected</h2>
     {% else %}
-    <h2>{{ep_analysis_metadata.computer_name}} | {{ep_analysis_metadata.verdict.replace('_', ' ') | title}}</h2>
+    <h2>{{endpoint_analysis_metadata.computer_name}} | {{endpoint_analysis_metadata.verdict.replace('_', ' ') | title}}</h2>
     {% endif %}
 
     <h2>Endpoint Analysis Summary</h2>
@@ -23,49 +23,49 @@
         <tbody>
         <tr>
             <td class="field-name">Analysis URL</td>
-            <td><a href="{{ep_analysis_metadata.analysis_url}}">{{ep_analysis_metadata.analysis_url}}</a></td>
+            <td><a href="{{endpoint_analysis_metadata.analysis_url}}">{{endpoint_analysis_metadata.analysis_url}}</a></td>
         </tr>
         <tr>
             <td class="field-name">Hostname</td>
-            <td>{{ep_analysis_metadata.computer_name}}</td>
+            <td>{{endpoint_analysis_metadata.computer_name}}</td>
         </tr>
         <tr>
             <td class="field-name">Verdict</td>
-            <td>{{ep_analysis_metadata.verdict.replace('_', ' ') | title}}</td>
+            <td>{{endpoint_analysis_metadata.verdict.replace('_', ' ') | title}}</td>
         </tr>
-        {% if ep_analysis_metadata.families %}
+        {% if endpoint_analysis_metadata.families %}
         <tr>
             <td class="field-name">Family</td>
-            <td>{{ep_analysis_metadata.families}}</td>
+            <td>{{endpoint_analysis_metadata.families}}</td>
         </tr>
         {% endif %}
         <tr>
             <td class="field-name">Scan status</td>
-            <td>{{ep_analysis_metadata.status.capitalize()}}</td>
+            <td>{{endpoint_analysis_metadata.status.capitalize()}}</td>
         </tr>
         <tr>
             <td class="field-name">OS version</td>
-            {% if ep_analysis_metadata.computer_os_version is defined %}
-            <td>{{ep_analysis_metadata.computer_os_version.replace('_', ' ').capitalize()}}</td>
+            {% if endpoint_analysis_metadata.computer_os_version is defined %}
+            <td>{{endpoint_analysis_metadata.computer_os_version.replace('_', ' ').capitalize()}}</td>
             {% else %}
             <td>N/A</td>
             {% endif %}
         </tr>
         <tr>
             <td class="field-name">Scanner version</td>
-            {% if ep_analysis_metadata.scanner_version is defined %}
-            <td>{{ep_analysis_metadata.scanner_version}}
+            {% if endpoint_analysis_metadata.scanner_version is defined %}
+            <td>{{endpoint_analysis_metadata.scanner_version}}
             {% else %}
             <td>N/A</td>
             {% endif %}
         </tr>
         <tr>
             <td class="field-name">Analyzed at</td>
-            <td>{{ep_analysis_metadata.analysis_time}}</td>
+            <td>{{endpoint_analysis_metadata.analysis_time}}</td>
         </tr>
         <tr>
             <td class="field-name">Analysis time</td>
-            <td>{{ep_analysis_metadata.calc_scan_time}}</td>
+            <td>{{endpoint_analysis_metadata.calc_scan_time}}</td>
         </tr>
         <tr>
             <td class="field-name">Report generated at</td>
@@ -79,7 +79,7 @@
         <tr>
             <th>File name</th>
             <th class="small-cell">Verdict</th>
-            {% if ep_analysis_metadata.verdict == 'malicious' and ep_analysis_metadata.families %}
+            {% if endpoint_analysis_metadata.verdict == 'malicious' and endpoint_analysis_metadata.families %}
             <th>Family</th>
             {% endif %}
             <th>Path</th>
@@ -91,12 +91,12 @@
             {% for analysis in sub_analyses %}
             <tr>
                 {% if sub_analyses_original_names[analysis['analysis_id']] is defined %}
-                <td><a href="{{analyze_base_url}}/endpoint-analyses/{{ep_analysis_metadata.analysis_id}}?sub={{analysis.analysis_id}}">{{sub_analyses_original_names[analysis.analysis_id]}}</a></td>
+                <td><a href="{{analyze_base_url}}/endpoint-analyses/{{endpoint_analysis_metadata.analysis_id}}?sub={{analysis.analysis_id}}">{{sub_analyses_original_names[analysis.analysis_id]}}</a></td>
                 {% else %}
-                <td><a href="{{analyze_base_url}}/endpoint-analyses/{{ep_analysis_metadata.analysis_id}}?sub={{analysis.analysis_id}}">{{analysis.sha256}}</a></td>
+                <td><a href="{{analyze_base_url}}/endpoint-analyses/{{endpoint_analysis_metadata.analysis_id}}?sub={{analysis.analysis_id}}">{{analysis.sha256}}</a></td>
                 {% endif %}
                 <td>{{analysis.verdict.capitalize()}}</td>
-                {% if loop.index0 < family_info|length and ep_analysis_metadata.families %}
+                {% if loop.index0 < family_info|length and endpoint_analysis_metadata.families %}
                 <td><a href="{{analyze_base_url}}/families/{{family_info[loop.index0]['family_id']}}">{{family_info[loop.index0]['family_name']}}</a></td>
                 {% endif %}
                 <td>N/A</td>
@@ -109,7 +109,7 @@
     <br/>
     <div>
         Total {{sub_analyses_count}} modules,
-        <a href="{{analyze_base_url}}/endpoint-analyses/{{ep_analysis_metadata.analysis_id}}">View all ></a>
+        <a href="{{analyze_base_url}}/endpoint-analyses/{{endpoint_analysis_metadata.analysis_id}}">View all ></a>
     </div>
 </article>
 </body>

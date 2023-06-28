@@ -10,16 +10,17 @@ from intezer_sdk import api
 from intezer_sdk.endpoint_analysis import EndpointAnalysis
 
 
-def format_analysis_time(scan_start: str, scan_end: str):
+def scan_duration(scan_start: str, scan_end: str):
     date_format = '%a, %d %b %Y %H:%M:%S %Z'
     # Calculating the time the endpoint scan took
     start_date = datetime.strptime(scan_start, date_format)
     end_date = datetime.strptime(scan_end, date_format)
     calc_scan_time = end_date - start_date
     # Setting the time format
-    hours = int(calc_scan_time.total_seconds()) // 3600
-    minutes = int(calc_scan_time.total_seconds() % 3600) // 60
-    seconds = int(calc_scan_time.total_seconds()) % 60
+    duration_in_seconds = int(calc_scan_time.total_seconds())
+    hours = duration_in_seconds // 3600
+    minutes = (duration_in_seconds % 3600) // 60
+    seconds = duration_in_seconds % 60
 
     formatted_time = ''
     if hours > 0:
@@ -37,7 +38,6 @@ def generate_report(
         template_text: str,
         logo_base64: str,
         save_html_to_file: bool = False):
-
     all_sub_analyses = endpoint_analysis.get_sub_analyses()
     sub_analyses = [sub_analysis for sub_analysis in all_sub_analyses if sub_analysis.verdict == 'malicious']
 
@@ -52,8 +52,8 @@ def generate_report(
         if analysis.verdict != 'malicious':
             continue
 
-        if analysis.code_reuse is not None:
-            # getting the malicious family name
+        if analysis.code_reuse:
+            # Getting the malicious family name
             malware_families = []
             families = sorted(analysis.code_reuse.get('families', []),
                               key=lambda family_: family_.get('reused_gene_count'), reverse=True)
@@ -69,17 +69,14 @@ def generate_report(
                 })
 
     # Basic info
-    ep_analysis_metadata = endpoint_analysis.result()
-    ep_analysis_metadata['status'] = endpoint_analysis.status.value
+    endpoint_analysis_metadata = endpoint_analysis.result()
+    endpoint_analysis_metadata['status'] = endpoint_analysis.status.value
 
-    ep_analysis_metadata['calc_scan_time'] = format_analysis_time(ep_analysis_metadata['scan_start_time'],
-                                                                  ep_analysis_metadata['scan_end_time'])
+    endpoint_analysis_metadata['calc_scan_time'] = scan_duration(endpoint_analysis_metadata['scan_start_time'],
+                                                                 endpoint_analysis_metadata['scan_end_time'])
 
-    if ep_analysis_metadata['families'] is not None and len(ep_analysis_metadata['families']) > 0:
-        if len(ep_analysis_metadata['families']) > 1:
-            ep_analysis_metadata['families'] = ', '.join(ep_analysis_metadata['families'])
-        else:
-            ep_analysis_metadata['families'] = ep_analysis_metadata['families'][0]
+    if endpoint_analysis_metadata['families']:
+        endpoint_analysis_metadata['families'] = ', '.join(endpoint_analysis_metadata['families'])
 
     sub_analyses_original_names = {}
     for analysis in sub_analyses:
@@ -90,14 +87,14 @@ def generate_report(
     report_template_data = {'sub_analyses': sub_analyses,
                             'sub_analyses_original_names': sub_analyses_original_names,
                             'family_info': family_info,
-                            'ep_analysis_metadata': ep_analysis_metadata,
+                            'endpoint_analysis_metadata': endpoint_analysis_metadata,
                             'sub_analyses_count': len(all_sub_analyses),
                             'logo_base64': logo_base64,
                             'css_input': css_input,
                             'now': time.strftime('%a, %d %b %Y %H:%M:%S %Z', time.gmtime()),
                             'analyze_base_url': 'https://analyze.intezer.com'}
 
-    environment = jinja2.Environment()
+    environment = jinja2.Environment(autoescape=True)
     template = environment.from_string(template_text)
 
     html = template.render(**report_template_data)
@@ -139,9 +136,29 @@ def generate_reports(intezer_apikey, endpoint_analyses_ids):
 
 
 if __name__ == '__main__':
+    generate_reports('2ce26e8a-f658-4aa2-878e-9e2f2867bbfe', ['5e32dd43-19fd-407c-90b1-5393ec1fd05b',
+                                                              '4c32d2fd-90a3-472d-80cb-ca2649400fce',
+                                                              '04e50e3e-c57e-42fb-ae8b-b2145f74aa49',
+                                                              'e707207b-1ebb-400d-a06a-233d159e78e5',
+                                                              '0cc05690-4203-4ce8-857d-d3a8caca753f',
+                                                              '3d6dd2e8-9496-41ba-bc19-8f5a1ad35549',
+                                                              '5600455a-d0ff-47de-afed-fe6f8dbb249b',
+                                                              'e604d686-4aaa-4413-b650-822babd45410',
+                                                              '9092b2f2-d4a5-4bc4-8440-3f7bfde4cdee',
+                                                              '3aa78c09-775e-432b-a7e0-f3b33caca646',
+                                                              '2a4e9def-505a-4274-8aed-946a876667ba',
+                                                              'edf73e19-22a9-4eac-89a2-56bdfe7b080b',
+                                                              '2dd439d7-45bb-4bf2-a65f-05f24ac4296c',
+                                                              '555501e5-baca-46f7-b5da-1d63d0ed57f9',
+                                                              '825b00d9-4503-40c2-a090-7f9f65fafb94',
+                                                              'ebf39060-e6c0-4fec-b7d2-4cd21c418ac4',
+                                                              '202872e7-b62c-4790-9bce-baf249f219de',
+                                                              '200a4f9f-a541-4a99-bfbe-c9ce0522c012',
+                                                              'f717c962-f6b0-4dd5-8339-a1657824b103'])
+    exit()
     parser = argparse.ArgumentParser(description='Generate a PDF and HTML reports for a given Intezer file scan')
     parser.add_argument('-k', '--api-key', help='Intezer API Key', required=True)
-    parser.add_argument('-a', '--analysisid', help='Endpoint Analysis IDs', required=True, nargs='+')
+    parser.add_argument('-a', '--analysis-id', help='Endpoint Analysis IDs', required=True, nargs='+')
 
     args = parser.parse_args()
-    generate_reports(args.api_key, args.analysisid)
+    generate_reports(args.api_key, args.analysis_id)
