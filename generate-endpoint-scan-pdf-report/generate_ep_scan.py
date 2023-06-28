@@ -10,14 +10,13 @@ from intezer_sdk import api
 from intezer_sdk.endpoint_analysis import EndpointAnalysis
 
 
-def scan_duration(scan_start: str, scan_end: str):
+def scan_duration(scan_start: str, scan_end: str) -> str:
     date_format = '%a, %d %b %Y %H:%M:%S %Z'
     # Calculating the time the endpoint scan took
     start_date = datetime.strptime(scan_start, date_format)
     end_date = datetime.strptime(scan_end, date_format)
-    calc_scan_time = end_date - start_date
     # Setting the time format
-    duration_in_seconds = int(calc_scan_time.total_seconds())
+    duration_in_seconds = int((end_date - start_date).total_seconds())
     hours = duration_in_seconds // 3600
     minutes = (duration_in_seconds % 3600) // 60
     seconds = duration_in_seconds % 60
@@ -72,8 +71,8 @@ def generate_report(
     endpoint_analysis_metadata = endpoint_analysis.result()
     endpoint_analysis_metadata['status'] = endpoint_analysis.status.value
 
-    endpoint_analysis_metadata['calc_scan_time'] = scan_duration(endpoint_analysis_metadata['scan_start_time'],
-                                                                 endpoint_analysis_metadata['scan_end_time'])
+    endpoint_analysis_metadata['scan_duration'] = scan_duration(endpoint_analysis_metadata['scan_start_time'],
+                                                                endpoint_analysis_metadata['scan_end_time'])
 
     if endpoint_analysis_metadata['families']:
         endpoint_analysis_metadata['families'] = ', '.join(endpoint_analysis_metadata['families'])
@@ -111,8 +110,8 @@ def generate_report(
     print(f'Saved PDF report to {analysis_id}.pdf')
 
 
-def generate_reports(intezer_apikey, endpoint_analyses_ids):
-    api.set_global_api(intezer_apikey)
+def generate_reports(intezer_api_key, endpoint_analyses_ids):
+    api.set_global_api(intezer_api_key)
 
     css_file_name = 'endpoint_analysis_pdf_report.css'
 
@@ -126,11 +125,11 @@ def generate_reports(intezer_apikey, endpoint_analyses_ids):
         logo_base64 = base64.b64encode(image_file.read()).decode('utf-8')
     for endpoint_analysis_id in endpoint_analyses_ids:
         try:
-            endpoint_analysis_obj = EndpointAnalysis.from_analysis_id(endpoint_analysis_id)
-            if not endpoint_analysis_obj:
+            endpoint_analysis = EndpointAnalysis.from_analysis_id(endpoint_analysis_id)
+            if not endpoint_analysis:
                 print(f"Analysis for endpoint analysis ID: {endpoint_analysis_id} isn't available")
 
-            generate_report(endpoint_analysis_obj, css_input, template_text, logo_base64)
+            generate_report(endpoint_analysis, css_input, template_text, logo_base64)
         except Exception:
             traceback.print_exc()
 
