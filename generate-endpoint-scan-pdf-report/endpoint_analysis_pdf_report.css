@@ -1,0 +1,82 @@
+html {
+  font-family: "Open Sans",sans-serif;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+h1 {
+  font-size: 2.5rem;
+  page: cover;
+  string-set: heading-name content();
+  margin-bottom: 0;
+}
+
+h2 {
+  string-set: heading content();
+}
+
+h3, h4 {
+  margin-top: 2rem;
+}
+
+h2 + h3, h3 + h4 {
+  margin-top: inherit;
+}
+
+ul {
+  page-break-inside: avoid;
+}
+
+a {
+  background-color: transparent;
+  color: #0969da;
+  text-decoration: none;
+}
+
+a:active, a:hover {
+  text-decoration: underline;
+}
+
+table {
+    table-layout: fixed;
+    width: 1400px;
+    border-spacing: 0;
+    border-collapse: collapse;
+    overflow: auto;
+}
+
+table th, table td {
+  padding: 0.5rem 1rem 0;
+  word-wrap: break-word;
+  text-align: left;
+  padding: 6px 13px;
+  border: 1px solid #d0d7de;
+}
+
+table tr {
+  background-color: #ffffff;
+  border-top: 1px solid #d0d7de;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+.logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+}
+
+.small-cell {
+    width: 125px;
+}
+
+.long-cell {
+    width: 600px;
+}
+
+.field-name {
+    width: 220px;
+}
