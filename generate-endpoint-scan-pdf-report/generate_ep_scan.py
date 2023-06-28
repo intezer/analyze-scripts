@@ -136,26 +136,6 @@ def generate_reports(intezer_apikey, endpoint_analyses_ids):
 
 
 if __name__ == '__main__':
-    generate_reports('2ce26e8a-f658-4aa2-878e-9e2f2867bbfe', ['5e32dd43-19fd-407c-90b1-5393ec1fd05b',
-                                                              '4c32d2fd-90a3-472d-80cb-ca2649400fce',
-                                                              '04e50e3e-c57e-42fb-ae8b-b2145f74aa49',
-                                                              'e707207b-1ebb-400d-a06a-233d159e78e5',
-                                                              '0cc05690-4203-4ce8-857d-d3a8caca753f',
-                                                              '3d6dd2e8-9496-41ba-bc19-8f5a1ad35549',
-                                                              '5600455a-d0ff-47de-afed-fe6f8dbb249b',
-                                                              'e604d686-4aaa-4413-b650-822babd45410',
-                                                              '9092b2f2-d4a5-4bc4-8440-3f7bfde4cdee',
-                                                              '3aa78c09-775e-432b-a7e0-f3b33caca646',
-                                                              '2a4e9def-505a-4274-8aed-946a876667ba',
-                                                              'edf73e19-22a9-4eac-89a2-56bdfe7b080b',
-                                                              '2dd439d7-45bb-4bf2-a65f-05f24ac4296c',
-                                                              '555501e5-baca-46f7-b5da-1d63d0ed57f9',
-                                                              '825b00d9-4503-40c2-a090-7f9f65fafb94',
-                                                              'ebf39060-e6c0-4fec-b7d2-4cd21c418ac4',
-                                                              '202872e7-b62c-4790-9bce-baf249f219de',
-                                                              '200a4f9f-a541-4a99-bfbe-c9ce0522c012',
-                                                              'f717c962-f6b0-4dd5-8339-a1657824b103'])
-    exit()
     parser = argparse.ArgumentParser(description='Generate a PDF and HTML reports for a given Intezer file scan')
     parser.add_argument('-k', '--api-key', help='Intezer API Key', required=True)
     parser.add_argument('-a', '--analysis-id', help='Endpoint Analysis IDs', required=True, nargs='+')
