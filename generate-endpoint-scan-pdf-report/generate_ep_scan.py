@@ -8,10 +8,11 @@ import jinja2
 import pdfkit
 from intezer_sdk import api
 from intezer_sdk.endpoint_analysis import EndpointAnalysis
+from intezer_sdk import consts
 
 
 def scan_duration(scan_start: str, scan_end: str) -> str:
-    date_format = '%a, %d %b %Y %H:%M:%S %Z'
+    date_format = consts.DEFAULT_DATE_FORMAT
     # Calculating the time the endpoint scan took
     start_date = datetime.strptime(scan_start, date_format)
     end_date = datetime.strptime(scan_end, date_format)
@@ -90,7 +91,7 @@ def generate_report(
                             'sub_analyses_count': len(all_sub_analyses),
                             'logo_base64': logo_base64,
                             'css_input': css_input,
-                            'now': time.strftime('%a, %d %b %Y %H:%M:%S %Z', time.gmtime()),
+                            'now': time.strftime(consts.DEFAULT_DATE_FORMAT, time.gmtime()),
                             'analyze_base_url': 'https://analyze.intezer.com'}
 
     environment = jinja2.Environment(autoescape=True)
@@ -135,7 +136,7 @@ def generate_reports(intezer_api_key, endpoint_analyses_ids):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generate a PDF and HTML reports for a given Intezer file scan')
+    parser = argparse.ArgumentParser(description='Generate a PDF and HTML reports for a given Intezer endpoint scans')
     parser.add_argument('-k', '--api-key', help='Intezer API Key', required=True)
     parser.add_argument('-a', '--analysis-id', help='Endpoint Analysis IDs', required=True, nargs='+')
 
