@@ -93,7 +93,7 @@ def generate_report(
     report_template_data['css_input'] = css_input
 
     # Generating the HTML report
-    environment = jinja2.Environment()
+    environment = jinja2.Environment(autoescape=True)
     template = environment.from_string(template_text)
     html = template.render(**report_template_data)
 
